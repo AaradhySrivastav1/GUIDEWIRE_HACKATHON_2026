@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Parametric Insurance Fraud Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #22c55e, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .card h2 {
+            color: #22c55e;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #22c55e;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            color: #e2e8f0;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .section {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 3px solid #06b6d4;
+        }
+
+        .section-title {
+            color: #06b6d4;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .results {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .result-box {
+            background: rgba(15, 23, 42, 0.7);
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .result-box.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .result-box.warning {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .result-box.success {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .risk-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
+            transition: width 0.5s ease;
+        }
+
+        .breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .risk-item {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #06b6d4;
+        }
+
+        .risk-item-label {
+            color: #94a3b8;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .risk-item-value {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .action-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .action-type {
+            color: #22c55e;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .action-message {
+            color: #cbd5e1;
+            font-size: 0.95em;
+        }
+
+        .loading {
+            text-align: center;
+            color: #22c55e;
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(34, 197, 94, 0.3);
+            border-top-color: #22c55e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-low {
+            background: #22c55e;
+        }
+
+        .status-medium {
+            background: #f59e0b;
+        }
+
+        .status-high {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .timestamp {
+            color: #64748b;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Parametric Insurance Fraud Detection</h1>
+            <p>AI-Powered Claim Verification System</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Form Section -->
+            <div class="card">
+                <h2>📋 Claim Submission</h2>
+                <form id="claimForm" onsubmit="submitClaim(event)">
+                    <!-- User Info -->
+                    <div class="section">
+                        <div class="section-title">👤 User Information</div>
+                        <div class="form-group">
+                            <label>User ID</label>
+                            <input type="text" id="user_id" placeholder="e.g., user123" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Device ID</label>
+                            <input type="text" id="device_id" placeholder="e.g., device_001" value="device_001">
+                        </div>
+                    </div>
+
+                    <!-- Claim Details -->
+                    <div class="section">
+                        <div class="section-title">💰 Claim Details</div>
+                        <div class="form-group">
+                            <label>Claim Amount ($)</label>
+                            <input type="number" id="claim_amount" placeholder="500" value="500" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Region</label>
+                            <input type="text" id="region" placeholder="downtown_area" value="downtown_area">
+                        </div>
+                        <div class="form-group">
+                            <label>Duration (minutes)</label>
+                            <input type="number" id="duration" placeholder="15" value="15">
+                        </div>
+                    </div>
+
+                    <!-- GPS & Location -->
+                    <div class="section">
+                        <div class="section-title">📍 GPS & Location</div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>GPS Accuracy (meters)</label>
+                                <input type="number" id="gps_accuracy" placeholder="15" value="15">
+                            </div>
+                            <div class="form-group">
+                                <label>Signal Quality (0-1)</label>
+                                <input type="number" id="signal_quality" placeholder="0.92" value="0.92" min="0" max="1" step="0.01">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Current Latitude</label>
+                                <input type="number" id="curr_lat" placeholder="40.7128" value="40.7128" step="0.0001">
+                            </div>
+                            <div class="form-group">
+                                <label>Current Longitude</label>
+                                <input type="number" id="curr_lon" placeholder="-74.0060" value="-74.0060" step="0.0001">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Previous Latitude</label>
+                                <input type="number" id="prev_lat" placeholder="40.7128" value="40.7128" step="0.0001">
+                            </div>
+                            <div class="form-group">
+                                <label>Previous Longitude</label>
+                                <input type="number" id="prev_lon" placeholder="-74.0061" value="-74.0061" step="0.0001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Device & Sensors -->
+                    <div class="section">
+                        <div class="section-title">📱 Device Sensors</div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Accelerometer Data (0-1)</label>
+                                <input type="number" id="accelerometer_data" placeholder="0.85" value="0.85" min="0" max="1" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Battery Drain (%)</label>
+                                <input type="number" id="battery_drain" placeholder="8" value="8" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>App Foreground Time (%)</label>
+                                <input type="number" id="app_foreground_time" placeholder="85" value="85" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>GPS Movement (km)</label>
+                                <input type="number" id="gps_movement" placeholder="0.15" value="0.15" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Network Info -->
+                    <div class="section">
+                        <div class="section-title">🌐 Network</div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Latency (ms)</label>
+                                <input type="number" id="latency_ms" placeholder="45" value="45">
+                            </div>
+                            <div class="form-group">
+                                <label>Time Diff (minutes)</label>
+                                <input type="number" id="time_diff_minutes" placeholder="1" value="1" min="0.1">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>IP Address</label>
+                            <input type="text" id="ip_address" placeholder="192.168.1.1" value="192.168.1.1">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn">Submit Claim for Verification</button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card results">
+                <h2>📊 Risk Assessment Results</h2>
+                <div id="resultsContainer">
+                    <p style="color: #94a3b8; text-align: center; padding: 40px 20px;">
+                        Submit a claim to see the fraud detection analysis
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000";
+
+        async function submitClaim(event) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById("submitBtn");
+            const resultsContainer = document.getElementById("resultsContainer");
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = "⏳ Processing...";
+            resultsContainer.innerHTML = '<div class="loading"><span class="spinner"></span>Analyzing claim...</div>';
+
+            try {
+                const claimData = {
+                    user_id: document.getElementById("user_id").value,
+                    claim_amount: Number(document.getElementById("claim_amount").value),
+                    device_id: document.getElementById("device_id").value,
+                    ip_address: document.getElementById("ip_address").value,
+                    gps_accuracy: Number(document.getElementById("gps_accuracy").value),
+                    signal_quality: Number(document.getElementById("signal_quality").value),
+                    accelerometer_data: Number(document.getElementById("accelerometer_data").value),
+                    battery_drain: Number(document.getElementById("battery_drain").value),
+                    app_foreground_time: Number(document.getElementById("app_foreground_time").value),
+                    latency_ms: Number(document.getElementById("latency_ms").value),
+                    duration: Number(document.getElementById("duration").value),
+                    region: document.getElementById("region").value,
+                    gps_history: [
+                        {
+                            lat: Number(document.getElementById("prev_lat").value),
+                            lon: Number(document.getElementById("prev_lon").value),
+                            timestamp: Math.floor(Date.now() / 1000) - 60
+                        },
+                        {
+                            lat: Number(document.getElementById("curr_lat").value),
+                            lon: Number(document.getElementById("curr_lon").value),
+                            timestamp: Math.floor(Date.now() / 1000)
+                        }
+                    ],
+                    curr_location: {
+                        lat: Number(document.getElementById("curr_lat").value),
+                        lon: Number(document.getElementById("curr_lon").value)
+                    },
+                    prev_location: {
+                        lat: Number(document.getElementById("prev_lat").value),
+                        lon: Number(document.getElementById("prev_lon").value)
+                    },
+                    time_diff_minutes: Number(document.getElementById("time_diff_minutes").value),
+                    gps_movement: Number(document.getElementById("gps_movement").value)
+                };
+
+                const response = await fetch(`${API_BASE}/submit-claim`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(claimData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === "success") {
+                    displaySuccessResult(result);
+                } else {
+                    displayErrorResult(result.message || "Unknown error occurred");
+                }
+            } catch (error) {
+                displayErrorResult(`Connection error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Claim for Verification";
+            }
+        }
+
+        function displaySuccessResult(data) {
+            const riskData = data.risk_assessment;
+            const riskLevel = riskData.risk_level;
+            const finalScore = riskData.final_risk_score;
+
+            let riskClass = 'success';
+            let statusClass = 'status-low';
+            if (riskLevel === 'MEDIUM') {
+                riskClass = 'warning';
+                statusClass = 'status-medium';
+            } else if (riskLevel === 'HIGH') {
+                riskClass = 'error';
+                statusClass = 'status-high';
+            }
+
+            const resultsContainer = document.getElementById("resultsContainer");
+            resultsContainer.innerHTML = `
+                <div class="result-box ${riskClass}">
+                    <div style="margin-bottom: 15px;">
+                        <span class="status-indicator ${statusClass}"></span>
+                        <strong>Claim ID:</strong> ${data.claim_id}<br>
+                        <strong>Amount:</strong> $${data.claim_amount}
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div style="margin-bottom: 8px;">
+                            <strong>Risk Level:</strong>
+                        </div>
+                        <span class="risk-badge risk-${riskLevel.toLowerCase()}">
+                            ${riskLevel}
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div style="margin-bottom: 8px;">
+                            <strong>Risk Score: ${(finalScore * 100).toFixed(1)}%</strong>
+                        </div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${finalScore * 100}%"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <strong>Recommendation:</strong> ${riskData.recommendation}
+                    </div>
+                </div>
+
+                <div class="breakdown">
+                    <div class="risk-item">
+                        <div class="risk-item-label">Location Risk</div>
+                        <div class="risk-item-value">${(riskData.breakdown.location_risk * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-item-label">Device Risk</div>
+                        <div class="risk-item-value">${(riskData.breakdown.device_risk * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-item-label">Behavior Risk</div>
+                        <div class="risk-item-value">${(riskData.breakdown.behavior_risk * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-item-label">Network Risk</div>
+                        <div class="risk-item-value">${(riskData.breakdown.network_risk * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="risk-item">
+                        <div class="risk-item-label">History Risk</div>
+                        <div class="risk-item-value">${(riskData.breakdown.history_risk * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <div class="action-box">
+                    <div class="action-type">⚡ Recommended Action:</div>
+                    <div style="font-size: 1.2em; margin-bottom: 8px; color: #22c55e;">${data.action.type}</div>
+                    <div class="action-message">${data.action.message}</div>
+                </div>
+
+                <div class="timestamp">
+                    Processed: ${new Date(data.timestamp).toLocaleString()}
+                </div>
+            `;
+        }
+
+        function displayErrorResult(errorMessage) {
+            const resultsContainer = document.getElementById("resultsContainer");
+            resultsContainer.innerHTML = `
+                <div class="result-box error">
+                    <div style="margin-bottom: 10px;">
+                        <strong>❌ Error Processing Claim</strong>
+                    </div>
+                    <div style="color: #fca5a5;">
+                        ${errorMessage}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check API health on load
+        window.addEventListener("load", async () => {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (!response.ok) {
+                    console.warn("API health check failed");
+                }
+            } catch (error) {
+                console.error("API is not reachable at", API_BASE);
+            }
+        });
+    </script>
+</body>
+</html>
